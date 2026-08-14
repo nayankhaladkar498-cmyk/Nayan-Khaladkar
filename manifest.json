@@ -1,0 +1,55 @@
+{
+  "name": "EventSetu - Plan. Book. Celebrate.",
+  "short_name": "EventSetu",
+  "description": "Maharashtra's leading event services marketplace for top venues, photographers, decorators, caterers, and DJs.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "categories": ["lifestyle", "business", "events", "shopping"],
+  "icons": [
+    {
+      "src": "./img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./img/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Find Venues",
+      "short_name": "Venues",
+      "description": "Discover banquet halls, lawns and convention centers",
+      "url": "./index.html#venues",
+      "icons": [{ "src": "./img/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Bookings",
+      "short_name": "Bookings",
+      "description": "View active event bookings and payments",
+      "url": "./index.html#customer-dashboard",
+      "icons": [{ "src": "./img/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Post Event",
+      "short_name": "Post Event",
+      "description": "Post your event requirements for instant vendor quotes",
+      "url": "./index.html#post-event",
+      "icons": [{ "src": "./img/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "EventSetu",
+  "description": "Production-ready event service booking marketplace connecting customers, vendors, and admins with Supabase integration and PWA capabilities.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

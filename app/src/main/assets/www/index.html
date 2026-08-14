@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="description" content="EventSetu - Maharashtra's Premier Event Services Marketplace for Venues, Photographers, Decorators, Caterers, and DJs">
+  <title>EventSetu - Plan. Book. Celebrate.</title>
+
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" href="./img/eventsetu_logo.png">
+  <link rel="apple-touch-icon" href="./img/eventsetu_logo.png">
+  <link rel="stylesheet" href="./css/style.css">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- ==================== TOP APP BAR ==================== -->
+  <header class="app-header" id="main-app-header">
+    <div class="header-inner">
+      <!-- Left: Hamburger Menu / Back -->
+      <div class="header-left">
+        <button class="icon-btn" id="drawer-toggle-btn" title="Open Navigation Menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Center: EventSetu Brand Logo Title -->
+      <div class="brand-header-center" onclick="window.EventSetuApp.handleBrandClick()">
+        <div class="brand-logo-title">
+          <img src="./img/eventsetu_logo.png" alt="EventSetu Logo" style="width:28px; height:28px; border-radius:8px; object-fit:cover;">
+          <span>EVENT<span class="es-gradient">SETU</span></span>
+        </div>
+        <span class="brand-tagline">Plan. Book. Celebrate.</span>
+      </div>
+
+      <!-- Right: Role Switcher / Notifications -->
+      <div class="header-right">
+        <button class="icon-btn" onclick="window.EventSetuApp.showView('role-selection')" title="Switch Portal / Role">
+          <span style="font-size:1.1rem;">🔄</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Location Sub-Bar (Visible in customer flow) -->
+    <div class="location-sub-bar" id="app-location-sub-bar">
+      <div class="location-picker" id="location-picker-btn" onclick="window.EventSetuApp.openModal('city-selector-modal')">
+        <span style="color:var(--primary);">📍</span>
+        <span id="current-location-text">Pune, Maharashtra</span>
+        <span style="font-size:0.7rem; color:var(--text-muted);">⌵</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span id="role-indicator-badge" class="badge-tag-category" style="position:static; background:var(--bg-subtle); color:var(--primary); font-size:0.68rem; padding:2px 8px; border-radius:var(--radius-full); cursor:pointer;" onclick="window.EventSetuApp.showView('role-selection')">
+          👤 Customer Portal
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== SIDE NAVIGATION DRAWER ==================== -->
+  <div class="drawer-backdrop" id="side-drawer-backdrop">
+    <div class="side-drawer">
+      <div class="drawer-header">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+          <img src="./img/eventsetu_logo.png" alt="EventSetu" style="width:46px; height:46px; border-radius:12px; object-fit:cover; border:2px solid rgba(255,255,255,0.4);">
+          <div>
+            <h3 style="font-size:1.1rem; font-weight:800; color:#fff;">EventSetu</h3>
+            <span style="font-size:0.75rem; color:rgba(255,255,255,0.8);">Maharashtra Event Hub</span>
+          </div>
+        </div>
+        <div id="drawer-user-info" style="font-size:0.85rem; color:rgba(255,255,255,0.9); border-top:1px solid rgba(255,255,255,0.2); padding-top:8px;">
+          <span>👋 Hello, <strong id="drawer-user-name">Guest User</strong></span>
+          <div id="drawer-user-role-label" style="font-size:0.72rem; color:rgba(255,255,255,0.7); margin-top:2px;">Role: Customer</div>
+        </div>
+      </div>
+
+      <div class="drawer-menu-list">
+        <div class="drawer-item" onclick="window.EventSetuApp.showView('role-selection'); window.EventSetuApp.closeDrawer();">
+          <span>🔄</span> <strong>Choose Portal (Role Select)</strong>
+        </div>
+
+        <hr style="border:none; border-top:1px solid var(--border-color); margin:8px 0;">
+
+        <!-- Customer Menu Items -->
+        <div class="drawer-item" onclick="window.EventSetuApp.showView('home'); window.EventSetuApp.closeDrawer();">
+          <span>🏠</span> Customer Marketplace
+        </div>
+        <div class="drawer-item" onclick="window.EventSetuCustomer.filterByCategory('Venues'); window.EventSetuApp.closeDrawer();">
+          <span>🏢</span> Find Venues & Lawns
+        </div>
+        <div class="drawer-item" onclick="window.EventSetuCustomer.filterByCategory('Photographer'); window.EventSetuApp.closeDrawer();">
+          <span>📸</span> Photographers & Films
+        </div>
+        <div class="drawer-item" onclick="window.EventSetuCustomer.filterByCategory('Decoration'); window.EventSetuApp.closeDrawer();">
+          <span>🌸</span> Stage & Mandap Decor
+        </div>
+        <div class="drawer-item" onclick="window.EventSetuCustomer.filterByCategory('Caterer'); window.EventSetuApp.closeDrawer();">
+          <span>🍽️</span> Catering & Pangat
+        </div>
+        <div class="drawer-item" onclick="window.EventSetuCustomer.filterByCategory('DJ & Music'); window.EventSetuApp.closeDrawer();">
+          <span>🎧</span> DJ, Lights & Sound
+        </div>
+        <div class="drawer-item" onclick="window.EventSetuApp.openPostEventModal(); window.EventSetuApp.closeDrawer();">
+          <span>📋</span> Post Event Requirement
+        </div>
+        <div class="drawer-item" onclick="window.EventSetuApp.showView('customer-dashboard'); window.EventSetuApp.closeDrawer();">
+          <span>📅</span> My Customer Bookings
+        </div>
+
+        <hr style="border:none; border-top:1px solid var(--border-color); margin:8px 0;">
+
+        <!-- Vendor & Admin Portal Links -->
+        <div class="drawer-item" onclick="window.EventSetuApp.showView('vendor-dashboard'); window.EventSetuApp.closeDrawer();">
+          <span>🏢</span> <strong>Vendor Business Dashboard</strong>
+        </div>
+        <div class="drawer-item" onclick="window.EventSetuApp.showView('admin-dashboard'); window.EventSetuApp.closeDrawer();">
+          <span>🛡️</span> <strong>Admin Governance Portal</strong>
+        </div>
+        
+        <hr style="border:none; border-top:1px solid var(--border-color); margin:8px 0;">
+        
+        <div class="drawer-item" onclick="window.EventSetuApp.openSupabaseSettings(); window.EventSetuApp.closeDrawer();">
+          <span>⚙️</span> Supabase Cloud Settings
+        </div>
+        <div class="drawer-item" id="drawer-install-pwa-btn" onclick="window.EventSetuApp.promptPwaInstall(); window.EventSetuApp.closeDrawer();">
+          <span>📲</span> Install App (PWA)
+        </div>
+        <div class="drawer-item" onclick="window.EventSetuAuth.logout(); window.EventSetuApp.closeDrawer();">
+          <span>🚪</span> Logout / Clear Session
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN CONTENT AREA ==================== -->
+  <main class="container">
+
+    <!-- ==================== VIEW 0: FIRST SCREEN — ROLE SELECTION ==================== -->
+    <div id="view-role-selection" class="view-panel role-selection-container">
+      
+      <!-- Hero Header Banner -->
+      <div class="role-hero-header">
+        <div class="role-hero-badge">✨ EventSetu Maharashtra</div>
+        <h1 class="role-hero-title">Choose Your Portal</h1>
+        <p class="role-hero-sub">
+          Select how you want to use EventSetu today. Dedicated flows for customers, verified vendors, and platform admins.
+        </p>
+      </div>
+
+      <!-- 3 Clear Role Cards -->
+      <div class="role-cards-grid">
+
+        <!-- 1. Customer Option Card -->
+        <div class="role-card-option" onclick="window.EventSetuApp.selectRolePortal('customer')">
+          <div class="role-card-header">
+            <div class="role-card-icon-box" style="background:#e0e7ff; color:#4338ca;">
+              👤
+            </div>
+            <div class="role-card-info">
+              <span class="role-tag-pill" style="background:#e0e7ff; color:#4338ca;">For Event Planners & Hosts</span>
+              <h3 class="role-card-title">Customer</h3>
+              <p class="role-card-desc">Find and book event services</p>
+            </div>
+          </div>
+          <div class="role-card-features">
+            <span class="role-feature-item">🏢 Browse Lawns & Banquets</span>
+            <span class="role-feature-item">📸 Top Photographers</span>
+            <span class="role-feature-item">💳 PhonePe Advance Booking</span>
+            <span class="role-feature-item">📄 Instant Booking Pass</span>
+          </div>
+          <div class="role-card-action-bar">
+            <span>Enter Customer Marketplace</span>
+            <button class="role-card-btn" style="background:var(--primary); color:#fff;">Continue ➔</button>
+          </div>
+        </div>
+
+        <!-- 2. Vendor Option Card -->
+        <div class="role-card-option" onclick="window.EventSetuApp.selectRolePortal('vendor')">
+          <div class="role-card-header">
+            <div class="role-card-icon-box" style="background:#dcfce7; color:#15803d;">
+              🏢
+            </div>
+            <div class="role-card-info">
+              <span class="role-tag-pill" style="background:#dcfce7; color:#15803d;">For Venues & Service Providers</span>
+              <h3 class="role-card-title">Vendor</h3>
+              <p class="role-card-desc">List and manage your services</p>
+            </div>
+          </div>
+          <div class="role-card-features">
+            <span class="role-feature-item">📋 Add Business Profile</span>
+            <span class="role-feature-item">🖼️ Upload Portfolio Photos</span>
+            <span class="role-feature-item">📦 Custom Service Packages</span>
+            <span class="role-feature-item">💰 Direct UPI Payouts</span>
+          </div>
+          <div class="role-card-action-bar">
+            <span style="color:#15803d;">Vendor Business Center</span>
+            <button class="role-card-btn" style="background:#15803d; color:#fff;">Vendor Portal ➔</button>
+          </div>
+        </div>
+
+        <!-- 3. Admin Option Card -->
+        <div class="role-card-option" onclick="window.EventSetuApp.selectRolePortal('admin')">
+          <div class="role-card-header">
+            <div class="role-card-icon-box" style="background:#ede9fe; color:#7c3aed;">
+              🛡️
+            </div>
+            <div class="role-card-info">
+              <span class="role-tag-pill" style="background:#ede9fe; color:#7c3aed;">Platform Governance & Ops</span>
+              <h3 class="role-card-title">Admin</h3>
+              <p class="role-card-desc">Manage EventSetu platform</p>
+            </div>
+          </div>
+          <div class="role-card-features">
+            <span class="role-feature-item">📊 Marketplace Overview</span>
+            <span class="role-feature-item">🛡️ Approve Vendor KYC</span>
+            <span class="role-feature-item">👥 Manage Customers & Bookings</span>
+            <span class="role-feature-item">💰 10% Commission Engine</span>
+          </div>
+          <div class="role-card-action-bar">
+            <span style="color:#7c3aed;">Platform Governance</span>
+            <button class="role-card-btn" style="background:#7c3aed; color:#fff;">Admin Console ➔</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Fast Demo Testing Row -->
+      <div style="background:#fff; border:1px solid var(--border-color); border-radius:var(--radius-lg); padding:14px; margin-top:20px; box-shadow:var(--shadow-xs); text-align:center;">
+        <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-bottom:8px;">⚡ 1-Tap Instant Persona Testing</div>
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="window.EventSetuAuth.switchDemoRole('customer'); window.EventSetuApp.updateUserNav(); window.EventSetuApp.showView('home');">👤 Rohit (Customer)</button>
+          <button class="btn btn-secondary btn-sm" onclick="window.EventSetuAuth.switchDemoRole('vendor'); window.EventSetuApp.updateUserNav(); window.EventSetuApp.showView('vendor-dashboard');">🏢 Nayan (Vendor)</button>
+          <button class="btn btn-secondary btn-sm" onclick="window.EventSetuAuth.switchDemoRole('admin'); window.EventSetuApp.updateUserNav(); window.EventSetuApp.showView('admin-dashboard');">🛡️ Admin (Superuser)</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== VIEW: DEDICATED CUSTOMER AUTH ==================== -->
+    <div id="view-auth-customer" class="view-panel hidden">
+      <div class="auth-page-card">
+        <div class="auth-header-row">
+          <button class="back-btn-pill" onclick="window.EventSetuApp.showView('role-selection')">←</button>
+          <div>
+            <span class="auth-role-badge" style="background:#e0e7ff; color:#4338ca;">Customer Portal</span>
+            <h2 style="font-size:1.3rem; font-weight:800; color:var(--text-main); margin-top:2px;">Customer Sign In</h2>
+          </div>
+        </div>
+
+        <div style="display:flex; background:var(--bg-subtle); padding:4px; border-radius:var(--radius-full); margin-bottom:16px;">
+          <button id="cust-tab-login" onclick="window.EventSetuApp.switchCustomerAuthTab('login')" style="flex:1; padding:8px; border:none; background:#fff; color:var(--primary); font-weight:700; border-radius:var(--radius-full); box-shadow:var(--shadow-xs);">Sign In</button>
+          <button id="cust-tab-reg" onclick="window.EventSetuApp.switchCustomerAuthTab('register')" style="flex:1; padding:8px; border:none; background:transparent; color:var(--text-muted); font-weight:700; border-radius:var(--radius-full);">Create Account</button>
+        </div>
+
+        <!-- Customer Login Form -->
+        <form id="cust-login-form" onsubmit="window.EventSetuApp.handleCustomerLogin(event)">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="cust-login-email" class="form-control" value="rohit@example.com" placeholder="rohit@example.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="cust-login-password" class="form-control" value="password123" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; margin-top:6px;">Sign In to Customer Portal</button>
+          <button type="button" class="btn btn-secondary" style="width:100%; margin-top:8px;" onclick="window.EventSetuAuth.switchDemoRole('customer'); window.EventSetuApp.showView('home');">⚡ Fast Sign In as Rohit Sharma</button>
+        </form>
+
+        <!-- Customer Register Form -->
+        <form id="cust-reg-form" style="display:none;" onsubmit="window.EventSetuApp.handleCustomerRegister(event)">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="cust-reg-name" class="form-control" placeholder="Rohit Sharma" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mobile Number</label>
+            <input type="tel" id="cust-reg-mobile" class="form-control" placeholder="9876543210" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="cust-reg-email" class="form-control" placeholder="rohit@example.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="cust-reg-password" class="form-control" placeholder="At least 6 characters" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; margin-top:6px;">Create Customer Account</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ==================== VIEW: DEDICATED VENDOR AUTH ==================== -->
+    <div id="view-auth-vendor" class="view-panel hidden">
+      <div class="auth-page-card">
+        <div class="auth-header-row">
+          <button class="back-btn-pill" onclick="window.EventSetuApp.showView('role-selection')">←</button>
+          <div>
+            <span class="auth-role-badge" style="background:#dcfce7; color:#15803d;">Vendor Business Center</span>
+            <h2 style="font-size:1.3rem; font-weight:800; color:var(--text-main); margin-top:2px;">Vendor Sign In</h2>
+          </div>
+        </div>
+
+        <div style="display:flex; background:var(--bg-subtle); padding:4px; border-radius:var(--radius-full); margin-bottom:16px;">
+          <button id="vend-tab-login" onclick="window.EventSetuApp.switchVendorAuthTab('login')" style="flex:1; padding:8px; border:none; background:#fff; color:#15803d; font-weight:700; border-radius:var(--radius-full); box-shadow:var(--shadow-xs);">Vendor Sign In</button>
+          <button id="vend-tab-reg" onclick="window.EventSetuApp.switchVendorAuthTab('register')" style="flex:1; padding:8px; border:none; background:transparent; color:var(--text-muted); font-weight:700; border-radius:var(--radius-full);">Register Business</button>
+        </div>
+
+        <!-- Vendor Login Form -->
+        <form id="vend-login-form" onsubmit="window.EventSetuApp.handleVendorLogin(event)">
+          <div class="form-group">
+            <label class="form-label">Vendor Registered Email</label>
+            <input type="email" id="vend-login-email" class="form-control" value="anand@royalphoto.com" placeholder="vendor@example.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="vend-login-password" class="form-control" value="password123" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; margin-top:6px; background:#15803d;">Sign In to Vendor Dashboard</button>
+          <button type="button" class="btn btn-secondary" style="width:100%; margin-top:8px;" onclick="window.EventSetuAuth.switchDemoRole('vendor'); window.EventSetuApp.showView('vendor-dashboard');">⚡ Fast Sign In as Green Valley Lawn</button>
+        </form>
+
+        <!-- Vendor Register Form -->
+        <form id="vend-reg-form" style="display:none;" onsubmit="window.EventSetuApp.handleVendorRegister(event)">
+          <div class="form-group">
+            <label class="form-label">Business / Venue Name *</label>
+            <input type="text" id="vend-reg-bizname" class="form-control" placeholder="e.g. Royal Palace Banquet & Lawns" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Owner / Contact Person *</label>
+            <input type="text" id="vend-reg-name" class="form-control" placeholder="e.g. Nayan Khaladkar" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Primary Service Category *</label>
+            <select id="vend-reg-cat" class="form-control">
+              <option value="Venues">🏢 Venues & Lawns</option>
+              <option value="Photographer">📸 Photographer & Cinematography</option>
+              <option value="Decoration">🌸 Stage & Mandap Decor</option>
+              <option value="Caterer">🍽️ Catering & Food</option>
+              <option value="DJ & Music">🎧 DJ, Lights & Sound</option>
+              <option value="Wedding Planner">💍 Wedding Planner</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contact Mobile Number *</label>
+            <input type="tel" id="vend-reg-mobile" class="form-control" placeholder="7249593243" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address *</label>
+            <input type="email" id="vend-reg-email" class="form-control" placeholder="business@example.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input type="password" id="vend-reg-password" class="form-control" placeholder="At least 6 characters" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; margin-top:6px; background:#15803d;">Register Business & Open Dashboard</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ==================== VIEW: DEDICATED ADMIN AUTH ==================== -->
+    <div id="view-auth-admin" class="view-panel hidden">
+      <div class="auth-page-card">
+        <div class="auth-header-row">
+          <button class="back-btn-pill" onclick="window.EventSetuApp.showView('role-selection')">←</button>
+          <div>
+            <span class="auth-role-badge" style="background:#ede9fe; color:#7c3aed;">Platform Governance</span>
+            <h2 style="font-size:1.3rem; font-weight:800; color:var(--text-main); margin-top:2px;">Admin Sign In</h2>
+          </div>
+        </div>
+
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px;">
+          Enter administrator credentials to access platform controls, vendor KYC approvals, and financial reconciliation.
+        </p>
+
+        <form onsubmit="window.EventSetuApp.handleAdminLogin(event)">
+          <div class="form-group">
+            <label class="form-label">Admin Email</label>
+            <input type="email" id="admin-login-email" class="form-control" value="admin@eventsetu.in" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Admin Security Key / Password</label>
+            <input type="password" id="admin-login-password" class="form-control" value="admin123" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; margin-top:6px; background:#7c3aed;">Sign In to Admin Console</button>
+          <button type="button" class="btn btn-secondary" style="width:100%; margin-top:8px;" onclick="window.EventSetuAuth.switchDemoRole('admin'); window.EventSetuApp.showView('admin-dashboard');">⚡ Fast Sign In as Platform Admin</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ==================== VIEW 1: HOME MARKETPLACE (Customer Flow) ==================== -->
+    <div id="view-home" class="view-panel hidden">
+      
+      <!-- Hero Carousel Card (Violet/Purple Gradient) -->
+      <div class="hero-card-container">
+        <div class="hero-banner-card">
+          <div class="hero-tag">✨ Featured Event Hub</div>
+          <h2 class="hero-headline">Your Event,<br>Our Responsibility</h2>
+          <p class="hero-desc">
+            Find the best venues, trusted vendors and manage your events with ease.
+          </p>
+          <button class="hero-cta-btn" onclick="window.EventSetuApp.openPostEventModal()">
+            <span>Explore Now</span>
+            <span style="font-size:1.1rem;">›</span>
+          </button>
+        </div>
+        <div class="carousel-dots">
+          <span class="dot active"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+      </div>
+
+      <!-- 4 Quick Action Tiles -->
+      <div class="quick-actions-grid">
+        <div class="action-tile" onclick="window.EventSetuCustomer.filterByCategory('Venues')">
+          <div class="tile-icon-box" style="background:#fee2e2; color:#ef4444;">🏢</div>
+          <div class="tile-title">Venues</div>
+          <div class="tile-sub">Find Venues</div>
+        </div>
+
+        <div class="action-tile" onclick="window.EventSetuCustomer.filterByCategory('All')">
+          <div class="tile-icon-box" style="background:#e0f2fe; color:#0284c7;">👥</div>
+          <div class="tile-title">Vendors</div>
+          <div class="tile-sub">Find Vendors</div>
+        </div>
+
+        <div class="action-tile" onclick="window.EventSetuApp.showView('customer-dashboard')">
+          <div class="tile-icon-box" style="background:#f3e8ff; color:#9333ea;">📅</div>
+          <div class="tile-title">My Bookings</div>
+          <div class="tile-sub">View Bookings</div>
+        </div>
+
+        <div class="action-tile" onclick="window.EventSetuApp.openPostEventModal()">
+          <div class="tile-icon-box" style="background:#dcfce7; color:#10b981;">📋</div>
+          <div class="tile-title">Post Event</div>
+          <div class="tile-sub">Post Requirement</div>
+        </div>
+      </div>
+
+      <!-- Popular Categories Section -->
+      <div class="section-header-row">
+        <h3 class="section-title-bold">Popular Categories</h3>
+        <span class="section-link" onclick="window.EventSetuCustomer.filterByCategory('All')">View All</span>
+      </div>
+
+      <div class="categories-horizontal-scroll" id="categories-scroll-container">
+        <div class="cat-item-card" onclick="window.EventSetuCustomer.filterByCategory('Wedding')">
+          <div class="cat-circle-icon" style="background:#fee2e2; color:#ef4444;">💍</div>
+          <span class="cat-name-label">Wedding</span>
+        </div>
+        <div class="cat-item-card" onclick="window.EventSetuCustomer.filterByCategory('Birthday')">
+          <div class="cat-circle-icon" style="background:#fef3c7; color:#f59e0b;">🎂</div>
+          <span class="cat-name-label">Birthday</span>
+        </div>
+        <div class="cat-item-card" onclick="window.EventSetuCustomer.filterByCategory('Corporate')">
+          <div class="cat-circle-icon" style="background:#e0f2fe; color:#0284c7;">💼</div>
+          <span class="cat-name-label">Corporate</span>
+        </div>
+        <div class="cat-item-card" onclick="window.EventSetuCustomer.filterByCategory('Engagement')">
+          <div class="cat-circle-icon" style="background:#f3e8ff; color:#9333ea;">💜</div>
+          <span class="cat-name-label">Engagement</span>
+        </div>
+        <div class="cat-item-card" onclick="window.EventSetuCustomer.filterByCategory('Exhibitions')">
+          <div class="cat-circle-icon" style="background:#dcfce7; color:#10b981;">🏪</div>
+          <span class="cat-name-label">Exhibitions</span>
+        </div>
+        <div class="cat-item-card" onclick="window.EventSetuCustomer.filterByCategory('Photographer')">
+          <div class="cat-circle-icon" style="background:#e0e7ff; color:#4f46e5;">📸</div>
+          <span class="cat-name-label">Photography</span>
+        </div>
+        <div class="cat-item-card" onclick="window.EventSetuCustomer.filterByCategory('Caterer')">
+          <div class="cat-circle-icon" style="background:#ffedd5; color:#ea580c;">🍽️</div>
+          <span class="cat-name-label">Catering</span>
+        </div>
+        <div class="cat-item-card" onclick="window.EventSetuCustomer.filterByCategory('Decoration')">
+          <div class="cat-circle-icon" style="background:#fce7f3; color:#ec4899;">🌸</div>
+          <span class="cat-name-label">Decoration</span>
+        </div>
+        <div class="cat-item-card" onclick="window.EventSetuCustomer.filterByCategory('DJ & Music')">
+          <div class="cat-circle-icon" style="background:#ede9fe; color:#7c3aed;">🎧</div>
+          <span class="cat-name-label">DJ & Sound</span>
+        </div>
+      </div>
+
+      <!-- Search Input Box -->
+      <div class="search-box-wrap">
+        <span class="search-lens-icon">🔍</span>
+        <input type="text" id="search-input" class="search-input-main" placeholder="Search venues, decorators, photographers, caterers...">
+      </div>
+
+      <!-- Featured Venues / Vendors List Section -->
+      <div class="section-header-row">
+        <h3 class="section-title-bold" id="listing-section-title">Featured Venues</h3>
+        <span class="section-link" onclick="window.EventSetuCustomer.filterByCategory('All')">View All</span>
+      </div>
+
+      <div class="venues-list-grid" id="venues-main-grid">
+        <!-- Rendered dynamically by CustomerApp -->
+      </div>
+    </div>
+
+    <!-- ==================== VIEW 2: BOOKING DETAILS & BREAKDOWN ==================== -->
+    <div id="view-booking-details" class="view-panel booking-details-page hidden">
+      
+      <!-- Sub Header Navigation -->
+      <div class="sub-header-nav">
+        <div class="nav-back-title">
+          <button class="back-btn-pill" onclick="window.EventSetuApp.showView('home')">←</button>
+          <div>
+            <div class="page-title-text">EventSetu</div>
+            <div class="page-subtitle-text">Booking Details</div>
+          </div>
+        </div>
+        <button class="icon-btn" onclick="window.EventSetuApp.showToast('24/7 Helpline Support: +91 7249593243', 'info')" title="24/7 Helpline">
+          🎧
+        </button>
+      </div>
+
+      <!-- Venue / Vendor Summary Card -->
+      <div class="summary-card" id="bk-detail-venue-card">
+        <div style="display:flex; gap:12px; align-items:center;">
+          <img id="bk-detail-venue-img" src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400&auto=format&fit=crop&q=80" alt="Venue Cover" style="width:70px; height:70px; border-radius:var(--radius-md); object-fit:cover;">
+          <div style="flex:1;">
+            <h4 id="bk-detail-venue-name" style="font-size:1.05rem; font-weight:800; color:var(--text-main);">Green Valley Lawn</h4>
+            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+              📍 <span id="bk-detail-venue-location">Hinjewadi, Pune</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-top:4px;">
+              <span class="rating-badge" id="bk-detail-venue-rating">★ 4.5 (76 Reviews)</span>
+              <span style="font-size:0.75rem; font-weight:700; color:var(--primary); cursor:pointer;" onclick="window.EventSetuCustomer.openVendorModalById(window.EventSetuCustomer.selectedVendor?.id)">View Details &gt;</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Booking Information Card -->
+      <div class="summary-card">
+        <div class="summary-card-header">
+          <span class="summary-card-title">📋 Booking Information</span>
+        </div>
+        <div class="info-grid-2col">
+          <div>
+            <div class="info-item-label">👥 Event Type</div>
+            <div class="info-item-val" id="bk-detail-event-type">Wedding</div>
+          </div>
+          <div>
+            <div class="info-item-label">📅 Event Date</div>
+            <div class="info-item-val" id="bk-detail-event-date">25 May 2026</div>
+          </div>
+          <div>
+            <div class="info-item-label">🕒 Start Time</div>
+            <div class="info-item-val" id="bk-detail-event-time">06:00 PM</div>
+          </div>
+          <div>
+            <div class="info-item-label">👥 Guest Count</div>
+            <div class="info-item-val" id="bk-detail-guest-count">300 Guests</div>
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <div class="info-item-label">📦 Venue Package</div>
+            <div class="info-item-val" id="bk-detail-package-name">Premium Package (₹75,000)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selected Services Card -->
+      <div class="summary-card">
+        <div class="summary-card-header">
+          <span class="summary-card-title">✨ Selected Services</span>
+        </div>
+        <div id="bk-detail-services-list">
+          <div class="service-breakdown-item">
+            <div>
+              <div class="service-item-title">🍽️ Catering</div>
+              <div class="service-item-sub">Premium Veg Menu</div>
+            </div>
+            <div class="service-item-price">₹25,000</div>
+          </div>
+          <div class="service-breakdown-item">
+            <div>
+              <div class="service-item-title">🏛️ Decoration</div>
+              <div class="service-item-sub">Royal Flower Decoration</div>
+            </div>
+            <div class="service-item-price">₹15,000</div>
+          </div>
+          <div class="service-breakdown-item">
+            <div>
+              <div class="service-item-title">📷 Photography</div>
+              <div class="service-item-sub">Full Day Photography</div>
+            </div>
+            <div class="service-item-price">₹20,000</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Summary Card -->
+      <div class="summary-card">
+        <div class="summary-card-header">
+          <span class="summary-card-title">👛 Payment Summary</span>
+        </div>
+        <div class="payment-calc-row">
+          <span>Total Amount</span>
+          <span style="font-weight:700; color:var(--text-main);" id="bk-detail-total-amt">₹1,35,000</span>
+        </div>
+        <div class="payment-calc-row advance-row">
+          <span>Advance (20%)</span>
+          <span id="bk-detail-advance-amt">₹27,000</span>
+        </div>
+        <div class="payment-calc-row">
+          <span>Remaining Amount</span>
+          <span style="font-weight:700; color:var(--text-main);" id="bk-detail-remaining-amt">₹1,08,000</span>
+        </div>
+
+        <div class="notice-info-banner">
+          <span>ℹ️</span>
+          <span>Pay advance amount to confirm your booking. Remaining balance to be paid on the event day.</span>
+        </div>
+      </div>
+
+      <!-- Fixed Bottom Payment Action Button -->
+      <div class="fixed-bottom-cta-bar">
+        <button class="btn-cta-primary" id="btn-pay-advance-cta" onclick="window.EventSetuApp.openPhonePePaymentModal()">
+          <span>Pay Advance</span>
+          <span id="btn-advance-label">₹27,000</span>
+          <span>➔</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== VIEW 3: CUSTOMER BOOKINGS DASHBOARD ==================== -->
+    <div id="view-customer-dashboard" class="view-panel hidden">
+      <div class="section-header-row">
+        <h3 class="section-title-bold">📅 My Event Bookings</h3>
+        <button class="btn btn-secondary btn-sm" onclick="window.EventSetuApp.showView('home')">+ New Booking</button>
+      </div>
+      <div id="customer-bookings-list" style="margin-top:14px;">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+
+    <!-- ==================== VIEW 4: VENDOR PORTAL ==================== -->
+    <div id="view-vendor-dashboard" class="view-panel hidden">
+      <div class="section-header-row">
+        <h3 class="section-title-bold">🏢 Vendor Business Portal</h3>
+        <button class="btn btn-secondary btn-sm" onclick="window.EventSetuVendor.openAddServiceModal()">+ Add Package</button>
+      </div>
+      <div id="vendor-dashboard-content" style="margin-top:14px;">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+
+    <!-- ==================== VIEW 5: ADMIN PORTAL ==================== -->
+    <div id="view-admin-dashboard" class="view-panel hidden">
+      <div class="section-header-row">
+        <h3 class="section-title-bold">🛡️ Platform Governance Admin</h3>
+      </div>
+      <div id="admin-dashboard-content" style="margin-top:14px;">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== MODAL: PHONEPE UPI QR PAYMENT ==================== -->
+  <div id="phonepe-payment-modal" class="modal-overlay">
+    <div class="modal-container" style="background:transparent; box-shadow:none; max-width:440px;">
+      <div class="phonepe-payment-card">
+        <button class="modal-close" style="position:absolute; top:16px; right:16px; background:rgba(255,255,255,0.15); color:#fff;" onclick="window.EventSetuApp.closeModal('phonepe-payment-modal')">✕</button>
+
+        <div class="phonepe-brand-badge">
+          <span style="background:#fff; color:#5f259f; font-weight:900; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.85rem;">पे</span>
+          <span>PhonePe UPI Payment</span>
+        </div>
+
+        <div class="phonepe-card-title">Advance Event Booking</div>
+        <div class="phonepe-amount-display">₹27,000</div>
+        
+        <div class="phonepe-qr-wrap">
+          <img id="phonepe-qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=upi://pay?pa=7249593243-2@axl" alt="PhonePe QR Code" class="phonepe-qr-image">
+        </div>
+
+        <div class="phonepe-payee-info">
+          <div>Verified Payee: <strong>NAYAN DATTATRAY KHALADKAR</strong></div>
+          <div class="upi-id-pill" onclick="window.EventSetuApp.copyUpiId('7249593243-2@axl')" title="Click to copy">
+            <span>7249593243-2@axl</span>
+            <span style="font-size:0.75rem;">📋 Copy</span>
+          </div>
+        </div>
+
+        <div class="payment-apps-grid">
+          <button class="btn-app-pay" onclick="window.EventSetuApp.launchUpiApp('phonepe')">
+            <span style="color:#5f259f; font-weight:900;">पे</span> PhonePe
+          </button>
+          <button class="btn-app-pay" onclick="window.EventSetuApp.launchUpiApp('gpay')">
+            <span style="color:#4285f4; font-weight:900;">G</span> Google Pay
+          </button>
+          <button class="btn-app-pay" onclick="window.EventSetuApp.launchUpiApp('paytm')">
+            <span style="color:#00b9f1; font-weight:900;">P</span> Paytm
+          </button>
+        </div>
+
+        <form id="phonepe-confirm-form" class="utr-submit-form">
+          <div class="form-group" style="margin-bottom:8px;">
+            <label class="form-label" style="color:rgba(255,255,255,0.9); font-size:0.75rem;">ENTER 12-DIGIT UPI UTR / TRANSACTION ID</label>
+            <input type="text" id="phonepe-utr-input" class="form-control" placeholder="e.g. 412589320145" required style="text-align:center; font-weight:700; letter-spacing:1px;">
+          </div>
+          <button type="submit" class="btn-confirm-advance">
+            ✓ Confirm Advance Payment
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: POST EVENT REQUIREMENT ==================== -->
+  <div id="post-event-modal" class="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">📋 Post Event Requirement</h3>
+        <button class="modal-close" onclick="window.EventSetuApp.closeModal('post-event-modal')">✕</button>
+      </div>
+      <form id="post-event-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Event Category / Type</label>
+            <select id="pe-event-type" class="form-control">
+              <option value="Wedding">💍 Wedding Ceremony & Reception</option>
+              <option value="Birthday">🎂 Birthday & Anniversary Celebration</option>
+              <option value="Corporate">💼 Corporate Conference & Gala</option>
+              <option value="Engagement">💜 Engagement & Sangeet</option>
+              <option value="Exhibitions">🏪 Exhibition & Expo Setup</option>
+            </select>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="form-group">
+              <label class="form-label">Event Date</label>
+              <input type="date" id="pe-event-date" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">City</label>
+              <select id="pe-event-city" class="form-control">
+                <option value="Pune">Pune</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Nagpur">Nagpur</option>
+                <option value="Nashik">Nashik</option>
+                <option value="Kolhapur">Kolhapur</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="form-group">
+              <label class="form-label">Guest Count</label>
+              <input type="number" id="pe-guest-count" class="form-control" placeholder="300" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Approx Budget (₹)</label>
+              <input type="number" id="pe-budget" class="form-control" placeholder="150000" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Your Name & Mobile</label>
+            <input type="text" id="pe-name" class="form-control" placeholder="Rohit Sharma - 9876543210" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="window.EventSetuApp.closeModal('post-event-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Post Requirement (Free)</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: VENDOR PROFILE DETAILS ==================== -->
+  <div id="vendor-profile-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="vp-modal-name">Vendor Profile</h3>
+        <button class="modal-close" onclick="window.EventSetuApp.closeModal('vendor-profile-modal')">✕</button>
+      </div>
+      <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
+        <img id="vp-modal-img" src="" alt="Vendor Cover" style="width:100%; height:180px; object-fit:cover; border-radius:var(--radius-md); margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <div>
+            <span class="badge-tag-category" id="vp-modal-category" style="position:static;">Venue</span>
+            <div id="vp-modal-location" style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">Pune, Maharashtra</div>
+          </div>
+        </div>
+        <h4 style="font-size:0.95rem; font-weight:800; color:var(--text-main); margin-bottom:8px;">Available Service Packages</h4>
+        <div id="vp-modal-services"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: CITY SELECTOR ==================== -->
+  <div id="city-selector-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 380px;">
+      <div class="modal-header">
+        <h3 class="modal-title">📍 Select Event City</h3>
+        <button class="modal-close" onclick="window.EventSetuApp.closeModal('city-selector-modal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <button class="btn btn-secondary" onclick="window.EventSetuApp.selectCity('Pune')">Pune</button>
+          <button class="btn btn-secondary" onclick="window.EventSetuApp.selectCity('Mumbai')">Mumbai</button>
+          <button class="btn btn-secondary" onclick="window.EventSetuApp.selectCity('Nagpur')">Nagpur</button>
+          <button class="btn btn-secondary" onclick="window.EventSetuApp.selectCity('Nashik')">Nashik</button>
+          <button class="btn btn-secondary" onclick="window.EventSetuApp.selectCity('Kolhapur')">Kolhapur</button>
+          <button class="btn btn-secondary" onclick="window.EventSetuApp.selectCity('Aurangabad')">Aurangabad</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: SUPABASE CONFIGURATION ==================== -->
+  <div id="supabase-settings-modal" class="modal-overlay">
+    <div class="modal-container" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 class="modal-title">⚙️ Supabase Settings</h3>
+        <button class="modal-close" onclick="window.EventSetuApp.closeModal('supabase-settings-modal')">✕</button>
+      </div>
+      <form id="supabase-config-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Supabase Project URL</label>
+            <input type="url" id="cfg-supabase-url" class="form-control" placeholder="https://xyz.supabase.co">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Anon Public Key</label>
+            <input type="text" id="cfg-supabase-key" class="form-control" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="window.EventSetuApp.closeModal('supabase-settings-modal')">Close</button>
+          <button type="submit" class="btn btn-primary">Save Settings</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- ==================== DEDICATED ROLE BOTTOM NAVIGATION BARS ==================== -->
+
+  <!-- 1. Customer Dedicated Bottom Nav -->
+  <nav class="role-nav-container" id="customer-bottom-nav" style="display:none;">
+    <div class="role-nav-inner">
+      <button class="role-nav-btn active" data-cust-target="home" onclick="window.EventSetuApp.showView('home')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        <span>Explore</span>
+      </button>
+
+      <button class="role-nav-btn" data-cust-target="venues" onclick="window.EventSetuCustomer.filterByCategory('Venues')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+        <span>Venues</span>
+      </button>
+
+      <button class="role-nav-btn" data-cust-target="post" onclick="window.EventSetuApp.openPostEventModal()">
+        <div style="background:var(--primary); color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:800; margin-top:-8px; box-shadow:var(--shadow-sm);">+</div>
+        <span>Post Req</span>
+      </button>
+
+      <button class="role-nav-btn" data-cust-target="customer-dashboard" onclick="window.EventSetuApp.showView('customer-dashboard')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <span>Bookings</span>
+      </button>
+
+      <button class="role-nav-btn" data-cust-target="roles" onclick="window.EventSetuApp.showView('role-selection')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+        <span>Switch</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- 2. Vendor Dedicated Bottom Nav -->
+  <nav class="role-nav-container" id="vendor-bottom-nav" style="display:none;">
+    <div class="role-nav-inner">
+      <button class="role-nav-btn active" onclick="window.EventSetuVendor.setTab('bookings')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        <span>Bookings</span>
+      </button>
+
+      <button class="role-nav-btn" onclick="window.EventSetuVendor.setTab('profile')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+        <span>My Profile</span>
+      </button>
+
+      <button class="role-nav-btn" onclick="window.EventSetuVendor.setTab('packages')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+        <span>Packages</span>
+      </button>
+
+      <button class="role-nav-btn" onclick="window.EventSetuVendor.setTab('gallery')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <span>Photos</span>
+      </button>
+
+      <button class="role-nav-btn" onclick="window.EventSetuApp.showView('role-selection')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+        <span>Switch</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- 3. Admin Dedicated Bottom Nav -->
+  <nav class="role-nav-container" id="admin-bottom-nav" style="display:none;">
+    <div class="role-nav-inner">
+      <button class="role-nav-btn active" onclick="window.EventSetuAdmin.setAdminTab('overview')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+        <span>Overview</span>
+      </button>
+
+      <button class="role-nav-btn" onclick="window.EventSetuAdmin.setAdminTab('approvals')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        <span>KYC</span>
+      </button>
+
+      <button class="role-nav-btn" onclick="window.EventSetuAdmin.setAdminTab('vendors')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+        <span>Vendors</span>
+      </button>
+
+      <button class="role-nav-btn" onclick="window.EventSetuAdmin.setAdminTab('commission')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span>Revenue</span>
+      </button>
+
+      <button class="role-nav-btn" onclick="window.EventSetuApp.showView('role-selection')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+        <span>Switch</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Application Scripts -->
+  <script src="./js/supabase.js"></script>
+  <script src="./js/upload.js"></script>
+  <script src="./js/auth.js"></script>
+  <script src="./js/booking.js"></script>
+  <script src="./js/customer.js"></script>
+  <script src="./js/vendor.js"></script>
+  <script src="./js/admin.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>
